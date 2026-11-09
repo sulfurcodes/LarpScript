@@ -35,6 +35,7 @@ It uses a custom slang-inspired syntax and Pest for parsing.
 | `cap` | False |
 | `nah` | Null |
 | `loop` | Loop |
+| `grind` | Loop over a range (`grind i in 5`) or a string's characters (`grind c in "rizz"`) |
 | `bet` | Break |
 | `clown` | Continue |
 | `fun` | Function |

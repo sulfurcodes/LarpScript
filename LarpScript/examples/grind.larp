@@ -1,0 +1,21 @@
+// grind: loop over a range or over the characters of a string
+
+grind i in 3 {
+    yap(i);
+}
+
+grind c in "rizz" {
+    if c == "z" {
+        clown;
+    }
+    yap(c);
+}
+
+cook total = 0;
+grind n in 10 {
+    if n == 5 {
+        bet;
+    }
+    total = total + n;
+}
+yap(total);

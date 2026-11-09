@@ -16,6 +16,7 @@ pub enum RuntimeError {
     BreakOutsideLoop,
     ContinueOutsideLoop,
     ReturnOutsideFunction,
+    InvalidIterable,
     UndefinedFunction(String),
     ArgumentCountMismatch {
         name: String,
@@ -40,6 +41,10 @@ impl fmt::Display for RuntimeError {
             Self::BreakOutsideLoop => write!(f, "'bet' used outside a loop"),
             Self::ContinueOutsideLoop => write!(f, "'clown' used outside a loop"),
             Self::ReturnOutsideFunction => write!(f, "'mog' used outside a function"),
+            Self::InvalidIterable => write!(
+                f,
+                "'grind' needs a non-negative whole number or a string"
+            ),
             Self::UndefinedFunction(name) => write!(f, "Undefined function: {name}"),
             Self::ArgumentCountMismatch {
                 name,

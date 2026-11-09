@@ -7,6 +7,7 @@ statement = _{
   | print_stmt
   | if_stmt
   | loop_stmt
+  | grind_stmt
   | break_stmt
   | continue_stmt
   | function_decl
@@ -25,6 +26,7 @@ if_stmt = {
 }
 
 loop_stmt = { "loop" ~ expr ~ block }
+grind_stmt = { "grind" ~ identifier ~ "in" ~ expr ~ block }
 block = { "{" ~ statement* ~ "}" }
 
 break_stmt = { "bet" ~ ";" }
@@ -109,7 +111,7 @@ identifier = @{
 keyword = _{
     (
         "cook" | "locked" | "yap"
-      | "if" | "else" | "loop"
+      | "if" | "else" | "loop" | "grind" | "in"
       | "bet" | "clown"
       | "fun" | "mog"
       | "fax" | "cap" | "nah"

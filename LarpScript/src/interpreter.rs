@@ -108,6 +108,9 @@ impl Interpreter {
             Rule::loop_stmt => {
                 return self.eval_loop(statement);
             }
+            Rule::grind_stmt => {
+                return self.eval_grind(statement);
+            }
             Rule::function_decl => {
                 self.eval_function_declaration(statement)?;
             }
@@ -245,6 +248,50 @@ impl Interpreter {
                 Flow::Return(value) => break Ok(Flow::Return(value)),
             }
         };
+        *self.loop_depth.borrow_mut() -= 1;
+        result
+    }
+    fn eval_grind(&self, statement: Pair<Rule>) -> Result<Flow, RuntimeError> {
+        let mut inner = statement.into_inner();
+        let name = inner
+            .next()
+            .ok_or(RuntimeError::MalformedStatement)?
+            .as_str()
+            .to_string();
+        let iterable = inner.next().ok_or(RuntimeError::MalformedStatement)?;
+        let body = inner.next().ok_or(RuntimeError::MalformedStatement)?;
+        let items: Vec<Value> = match self.eval_expression(iterable)? {
+            Value::Number(n) if n >= 0.0 && n.fract() == 0.0 => {
+                (0..n as u64).map(|k| Value::Number(k as f64)).collect()
+            }
+            Value::String(s) => s.chars().map(|c| Value::String(c.to_string())).collect(),
+            _ => return Err(RuntimeError::InvalidIterable),
+        };
+        *self.loop_depth.borrow_mut() += 1;
+        let mut result = Ok(Flow::Normal);
+        for item in items {
+            self.environment.borrow_mut().push_scope();
+            // Two statements on purpose: the environment borrow must end before eval_block
+            // borrows it again, or the RefCell panics with "already borrowed".
+            let defined = self
+                .environment
+                .borrow_mut()
+                .define_variable(name.clone(), item, false);
+            let step = defined.and_then(|_| self.eval_block(body.clone()));
+            self.environment.borrow_mut().pop_scope();
+            match step {
+                Ok(Flow::Normal | Flow::Continue) => {}
+                Ok(Flow::Break) => break,
+                Ok(Flow::Return(value)) => {
+                    result = Ok(Flow::Return(value));
+                    break;
+                }
+                Err(error) => {
+                    result = Err(error);
+                    break;
+                }
+            }
+        }
         *self.loop_depth.borrow_mut() -= 1;
         result
     }
